@@ -52,3 +52,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+$route['tax-tools/form-12bb'] = 'web/tax_tools/index';
+$route['tax-tools/form-12bb/pdf'] = 'web/tax_tools/createPdf';
+$route['tax-tools/form-12bb/save'] = 'web/tax_tools/saveAndUpdateForm';
+$route['tax-tools/form-12bb/load'] = 'web/tax_tools/loadData';
+$route['csrf-token']               = 'tax_tools/getCsrfToken';
+// $route['tax-tools/form-12bb']['post'] = 'api/tax_tools/form_12bb';
+// $route['tax-tools/form-12bb']['get'] = 'api/tax_tools/form_12bb';
+// $route['api/tax-tools/get-previous-form-12bb']['post'] = 'api/tax_tools/get_previous_form_12bb';
