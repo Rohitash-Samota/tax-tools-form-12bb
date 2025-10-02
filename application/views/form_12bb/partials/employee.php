@@ -11,7 +11,7 @@
     </div>
     <div class="col-md-4 col-sm-6 col-xs-12 form-group">
         <label for="employee_pan">PAN <em>*</em></label>
-        <input type="text" name="pan" value="" class="form-control pan_optional text-uppercase" required id="employee_pan" maxlength="10" placeholder="PAN No." aria-required="true">
+        <input type="text" name="pan" value="" class="form-control pan_optional text-uppercase" required id="employee_pan" maxlength="10" placeholder="PAN No." aria-required="true" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}">
     </div>
     <div class="col-md-4 col-sm-6 col-xs-12 form-group">
         <label for="employee_father_name">Father's Name <em>*</em></label>
@@ -25,11 +25,11 @@
     </div>
     <div class="col-md-4 col-sm-6 col-xs-12 form-group">
         <label for="BasicDetails_mobile_no">Mobile <em>*</em></label>
-        <input type="number" name="mobile_no" value="" class="form-control mobile_no" required id="BasicDetails_mobile_no" maxlength="10" placeholder="Mobile" aria-required="true">
+        <input type="tel" inputmode="numeric" name="mobile_no" value="" class="form-control mobile_no" required id="BasicDetails_mobile_no" maxlength="10" placeholder="Mobile" aria-required="true" pattern="[6-9]{1}[0-9]{9}">
     </div>
     <div class="col-md-4 col-sm-6 col-xs-12 form-group">
         <label for="BasicDetails_email">Email Id <em>*</em></label>
-        <input type="email" name="email" value="" class="form-control" required id="BasicDetails_email" maxlength="125" placeholder="Email" aria-required="true">
+        <input type="email" name="email" value="" class="form-control" required id="BasicDetails_email" maxlength="125" placeholder="Email" aria-required="true" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
     </div>
 </div>
 <div class="row">

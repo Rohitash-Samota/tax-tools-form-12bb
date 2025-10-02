@@ -71,31 +71,46 @@ class Form12bb_repository extends CI_Model
         switch ($step) {
             case 'employee_details':
                 $this->form_validation->set_rules('employee_name', 'Name', 'trim|required|max_length[100]');
-                $this->form_validation->set_rules('pan', 'PAN', 'trim|required|alpha_numeric|exact_length[10]');
+                $this->form_validation->set_rules(
+                    'pan',
+                    'PAN',
+                    'trim|required|regex_match[/^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/]',
+                    ['regex_match' => 'Invalid PAN format. Example: ABCDE1234F']
+                );
                 $this->form_validation->set_rules('father_name', 'Father Name', 'trim|required|max_length[100]');
-                $this->form_validation->set_rules('mobile_no', 'Mobile', 'trim|required|numeric|exact_length[10]');
-                $this->form_validation->set_rules('email', 'Email', 'trim|valid_email|max_length[100]');
+                $this->form_validation->set_rules(
+                    'mobile_no',
+                    'Mobile',
+                    'trim|required|regex_match[/^[6-9][0-9]{9}$/]',
+                    ['regex_match' => 'Enter a valid 10-digit Indian mobile number.']
+                );
+                $this->form_validation->set_rules(
+                    'email',
+                    'Email',
+                    'trim|required|regex_match[/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i]',
+                    ['regex_match' => 'Invalid email address.']
+                );
                 $this->form_validation->set_rules('place', 'Place', 'trim|max_length[100]');
                 $this->form_validation->set_rules('address', 'Address', 'trim');
                 break;
 
             case 'housing_rent_allowance':
-                $this->form_validation->set_rules('hra_rent_paid', 'Rent Paid', 'trim|required|numeric');
-                $this->form_validation->set_rules('hra_landlord_name', 'HRA Landlord Name', 'trim|required|max_length[100]');
-                $this->form_validation->set_rules('hra_landlord_pan', 'HRA Landlord PAN', 'trim|alpha_numeric|exact_length[10]');
+                $this->form_validation->set_rules('hra_rent_paid', 'Rent Paid', 'trim|numeric');
+                $this->form_validation->set_rules('hra_landlord_name', 'HRA Landlord Name', 'trim|max_length[100]');
+                $this->form_validation->set_rules('hra_landlord_pan', 'HRA Landlord PAN', 'trim|alpha_numeric|exact_length[10]|regex_match[/^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/]', ['regex_match' => 'Invalid PAN format. Example: ABCDE1234F']);
                 $this->form_validation->set_rules('hra_landlord_address', 'HRA Landlord Address', 'trim|max_length[200]');
                 $this->form_validation->set_rules('hra_evidence', 'HRA Evidence', 'trim|max_length[200]');
                 break;
 
             case 'leave_travel_concession':
-                $this->form_validation->set_rules('ltc_amount', 'LTC Amount', 'trim|required|numeric');
+                $this->form_validation->set_rules('ltc_amount', 'LTC Amount', 'trim|numeric');
                 $this->form_validation->set_rules('ltc_evidence', 'LTC Evidence', 'trim|max_length[200]');
                 break;
 
             case 'interest_on_loan':
-                $this->form_validation->set_rules('home_loan_interest_payable', 'Interest Payable', 'trim|required|numeric');
-                $this->form_validation->set_rules('home_loan_lender_name', 'Lender Name', 'trim|required|max_length[100]');
-                $this->form_validation->set_rules('home_loan_lender_pan', 'Lender PAN', 'trim|alpha_numeric|exact_length[10]');
+                $this->form_validation->set_rules('home_loan_interest_payable', 'Interest Payable', 'trim|numeric');
+                $this->form_validation->set_rules('home_loan_lender_name', 'Lender Name', 'trim|max_length[100]');
+                $this->form_validation->set_rules('home_loan_lender_pan', 'Lender PAN', 'trim|alpha_numeric|exact_length[10]|regex_match[/^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/]', ['regex_match' => 'Invalid PAN format. Example: ABCDE1234F']);
                 $this->form_validation->set_rules('home_loan_lender_address', 'Lender Address', 'trim|max_length[200]');
                 $this->form_validation->set_rules('home_loan_evidence', 'Loan Evidence', 'trim|max_length[200]');
                 break;

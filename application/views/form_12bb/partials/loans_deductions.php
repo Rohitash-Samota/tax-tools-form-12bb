@@ -12,7 +12,7 @@
   <div class="row">
     <div class="col-md-6 col-sm-6 col-xs-12 form-group">
       <label for="home_loan_lender_pan"> PAN of Lender</label>
-      <input type="text" name="home_loan_lender_pan" value="" class="form-control pan_optional uppercase" id="home_loan_lender_pan" maxlength="10" placeholder="PAN of Lender">
+      <input type="text" name="home_loan_lender_pan" value="" class="form-control pan_optional uppercase" id="home_loan_lender_pan" maxlength="10" placeholder="PAN of Lender" pattern="^[A-Z]{5}[0-9]{4}[A-Z]$">
     </div>
     <div class="col-md-6 col-sm-12 col-xs-12 form-group">
       <label for="home_loan_lender_evidence">Evidence</label>

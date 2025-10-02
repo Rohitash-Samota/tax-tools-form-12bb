@@ -27,7 +27,7 @@
       </div>
       <div class="col-md-4 col-sm-6 col-xs-12 form-group">
         <label for="hra_landlord_pan"> PAN of Landlord <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" data-original-title="If the aggregate rent paid during the year exceeds one lakh rupees, its compulsory to give the PAN of the landlord."></i> </label>
-        <input type="text" name="hra_landlord_pan" value="" class="form-control pan_optional uppercase hra_pan_required_above_lakh" id="hra_landlord_pan" maxlength="10" placeholder="PAN of Landlord">
+        <input type="text" name="hra_landlord_pan" value="" class="form-control pan_optional uppercase hra_pan_required_above_lakh" id="hra_landlord_pan" maxlength="10" placeholder="PAN of Landlord" pattern="^[A-Z]{5}[0-9]{4}[A-Z]$">
       </div>
     </div>
     <div class="col-md-12 col-sm-12 col-xs-12 text-center">
