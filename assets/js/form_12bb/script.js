@@ -254,22 +254,22 @@
 							}).appendTo($form);
 					}
 
-					// CSRF refresh if provided; otherwise fetch
 					if (res && res.csrf && res.csrf.name && res.csrf.hash) {
 						setCsrf(res.csrf);
 					} else {
 						updateCsrfFromResponse();
 					}
 
-					// --- Validation branch ---
 					if (res && res.status === "failed") {
-						// res.message + res.errors { key: msg }
 						showStepErrors(tabId, res.errors || {});
 						if (res.message) showStepMessage(tabId, "danger", res.message);
 					} else {
 						clearStepErrors(tabId);
-						if (res && res.message)
+						if (res && res.message ) {
+							if(tabId === 'tab5' && res.status === 'success' && res){
+							}
 							showStepMessage(tabId, "success", res.message);
+						}
 					}
 				})
 				.then(function (res) {
