@@ -90,7 +90,6 @@ class Tax_tools extends CI_Controller
             }
 
             $result['csrf'] = $this->getCsrf();
-            log_message('info', 'Form saved/updated: ' . json_encode($result));
             return $this->json($result);
         } catch (Throwable $e) {
             return $this->json([

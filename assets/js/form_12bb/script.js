@@ -101,7 +101,7 @@
           $el.addClass("is-invalid");
           if (!$container.find(".invalid-feedback.validation-msg").length) {
             $container.append(
-              '<div class="invalid-feedback validation-msg" style="display:block;"></div>'
+              '<div class="invalid-feedback validation-msg" style="display:block;color:red;"></div>'
             );
           }
           $container.find(".invalid-feedback.validation-msg").text(errors[key]);
@@ -230,6 +230,10 @@
 
     function saveStep(tabId) {
       var data = serializeCurrentTab(tabId);
+      const isValid = validateInputs(data);
+      if (!isValid) {
+        return;
+      }
       var payload = $.extend({}, getCsrf(), data);
 
       var doPost = function () {
@@ -439,11 +443,13 @@
       saveStep(current).always(function (result) {
         var ok = result && (result.ok === true || result.status === "success");
         if (!ok) return;
-		console.log("Result:  here");
-		console.log(result);
+        console.log("Result:  here");
+        console.log(result);
         if (current === "tab5") {
           var formId =
-            result.res.form_id || (result.res.data && result.res.data.id) || null;
+            result.res.form_id ||
+            (result.res.data && result.res.data.id) ||
+            null;
           if (!formId) {
             return;
           }
@@ -500,5 +506,71 @@
         }, 600);
       }
     });
+    function validateInputs(data) {
+      let isValid = true;
+      clearStepErrors(activeTab());
+
+      const $scope = $("#" + activeTab());
+
+      $scope
+        .find("input[required], select[required], textarea[required]")
+        .each(function () {
+          const $field = $(this);
+          const name = $field.attr("name");
+          const val = data[name];
+
+          if ($field.is(":checkbox")) {
+            if (!$scope.find('[name="' + name + '"]:checked').length) {
+              markInvalid($field, "Input is required");
+              isValid = false;
+            }
+          } else if ($field.is(":radio")) {
+            if (!$scope.find('[name="' + name + '"]:checked').length) {
+              markInvalid($field, "Input is required");
+              isValid = false;
+            }
+          } else {
+            if (!val || val.toString().trim() === "") {
+              markInvalid($field, "Input is required");
+              isValid = false;
+            }
+          }
+        });
+
+      if (data.pan !== undefined) {
+        const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+        if (!panRegex.test((data.pan || "").toUpperCase())) {
+          const $field = $scope.find('[name="pan"]');
+          markInvalid($field, "Invalid PAN format. Example: ABCDE1234F");
+          isValid = false;
+        }
+      }
+
+      if (data.email !== undefined) {
+        const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+        if (!emailRegex.test(data.email || "")) {
+          const $field = $scope.find('[name="email"]');
+          markInvalid($field, "Please enter a valid email address");
+          isValid = false;
+        }
+      }
+
+      return isValid;
+    }
+
+    function markInvalid($field, message) {
+      const $container = $field.closest(".form-group, .mb-3, .form-field")
+        .length
+        ? $field.closest(".form-group, .mb-3, .form-field")
+        : $field;
+
+      $field.addClass("is-invalid");
+      if (!$container.find(".invalid-feedback.validation-msg").length) {
+        $container.append(
+          '<div class="invalid-feedback validation-msg" style="display:block;color:red;"></div>'
+        );
+      }
+      $container.find(".invalid-feedback.validation-msg").text(message);
+    }
   });
 })();
