@@ -30,7 +30,6 @@ class Form12bb_repository extends CI_Model
     public function save_step(string $step_name, array $inputs): array
     {
         try {
-            log_message('debug', 'Repo::save_step ' . $step_name);
             $form_id = isset($inputs['form_id']) && $inputs['form_id'] !== '' ? (int)$inputs['form_id'] : null;
 
             $valid = $this->validate_step($step_name, $inputs);
@@ -116,7 +115,10 @@ class Form12bb_repository extends CI_Model
                 break;
 
             case 'deductions':
-                if (!isset($data['deductions']) || !is_array($data['deductions']) || empty($data['deductions'])) {
+                if($data['deductions'] === null) {
+                    $data['deductions'] = [];
+                }
+                if (!isset($data['deductions']) || !is_array($data['deductions'])) {
                     $errors['deductions'] = 'Deductions must be a non-empty array.';
                 } else {
                     $idx = 0;

@@ -55,6 +55,7 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['tax-tools/form-12bb'] = 'web/tax_tools/index';
 $route['tax-tools/form-12bb/pdf'] = 'web/tax_tools/createPdf';
+$route['tax-tools/form-12bb/pdf/(:num)'] = 'web/tax_tools/form_12bb_pdf/$1';
 $route['tax-tools/form-12bb/save'] = 'web/tax_tools/saveAndUpdateForm';
 $route['tax-tools/form-12bb/load'] = 'web/tax_tools/loadData';
 $route['csrf-token']               = 'tax_tools/getCsrfToken';

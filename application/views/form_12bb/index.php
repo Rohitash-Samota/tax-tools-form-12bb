@@ -12,7 +12,16 @@
                             Use this Form 12BB generator to declare investments, interest paid against Home Loan, House Rent Allowance, Leave Travel Allowance and other tax saving deductions.</p>
                     </div>
                 </div>
-                <div class="col-md-9 col-sm-12 col-xs-12">
+                <div id="pdfContainer" style="display:none;">
+                    <div class="pdf-toolbar" style="margin:15px 0;">
+                        <button type="button" class="btn btn-default" id="btnPdfBack">Back</button>
+                        <button type="button" class="btn btn-primary" id="btnPdfPrint">Print</button>
+                        <a class="btn btn-success" id="btnPdfDownload" href="#" target="_blank" rel="noopener">Download</a>
+                    </div>
+                    <iframe id="pdfFrame" src="" width="100%" height="900" style="border:0;"></iframe>
+                </div>
+                
+                <div class="col-md-9 col-sm-12 col-xs-12 tab-container">
                     <div class="right">
                         <div class="row">
                             <div class="col-md-12">

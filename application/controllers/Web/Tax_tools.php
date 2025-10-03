@@ -15,6 +15,7 @@ class Tax_tools extends CI_Controller
         $this->load->helper(['url', 'form', 'security']);
         $this->load->library(['session']);
         $this->load->model('Form12bb_repository', 'formRepo');
+        $this->load->library('dompdf_lib');
     }
 
     public function index()
@@ -63,7 +64,6 @@ class Tax_tools extends CI_Controller
                 'csrf'   => $this->getCsrf(),
             ]);
         } catch (Throwable $e) {
-            log_message('error', 'loadData error: ' . $e->getMessage());
             return $this->json([
                 'status' => 'failed',
                 'message' => 'An error occurred while loading the form.',
@@ -81,16 +81,18 @@ class Tax_tools extends CI_Controller
                 $inputs['deductions'] = $this->formateDeductions($inputs);
             }
             $result = $this->formRepo->save_step($step_name, $inputs);
-
+            if ($result && isset($result['status']) && $result['status'] == 'failed') {
+                $result['csrf'] = $this->getCsrf();
+                return $this->json($result, 400);
+            }
             if (!is_array($result)) {
                 $result = ['status' => 'success', 'data' => $result];
             }
 
-            $result['csrf'] = $this->getCsrf(); // rotate token back to client
-
+            $result['csrf'] = $this->getCsrf();
+            log_message('info', 'Form saved/updated: ' . json_encode($result));
             return $this->json($result);
         } catch (Throwable $e) {
-            log_message('error', 'saveAndUpdateForm error: ' . $e->getMessage());
             return $this->json([
                 'status' => 'failed',
                 'message' => 'An error occurred while saving the form.',
@@ -99,47 +101,22 @@ class Tax_tools extends CI_Controller
         }
     }
 
-    public function createPdf()
+    public function form_12bb_pdf($form_id)
     {
-        try {
-            $inputs  = $this->input->get();
-            $form_id = isset($inputs['form_id']) ? (int)$inputs['form_id'] : 0;
+        $form_id = (int)$form_id;
+        if (!$form_id) show_404();
 
-            if (!$form_id) {
-                throw new InvalidArgumentException('Form ID is required to generate PDF.');
-            }
+        $data = $this->formRepo->get_full($form_id);
+        if (!$data) show_404();
 
-            $data = $this->formRepo->get_full($form_id);
-            if (!$data) {
-                throw new InvalidArgumentException('Invalid Form ID. No data found.');
-            }
+        $html = $this->load->view('form_12bb/pdf', ['data' => $data], true);
 
-            $html = $this->load->view('form12bb/pdf', $data, TRUE);
+        $disposition = $this->input->get('disposition') === 'download' ? 'download' : 'inline';
+        $this->dompdf_lib->render_html($html);
 
-            $options = new \Dompdf\Options();
-            $options->set('isRemoteEnabled', true);
-            $options->set('isHtml5ParserEnabled', true);
-            $options->set('defaultFont', 'DejaVu Sans');
-
-            $dompdf = new \Dompdf\Dompdf($options);
-            $dompdf->setPaper('A4', 'portrait');
-            $dompdf->loadHtml($html, 'UTF-8');
-            $dompdf->render();
-
-            $canvas = $dompdf->get_canvas();
-            $w = $canvas->get_width();
-            $h = $canvas->get_height();
-            $canvas->page_text($w - 120, $h - 28, "Page {PAGE_NUM} of {PAGE_COUNT}", null, 9, array(0, 0, 0));
-            $canvas->page_text(40, $h - 28, date('Y-m-d H:i'), null, 9, array(0, 0, 0));
-
-            $filename = 'Form-12BB-' . $form_id . '.pdf';
-            $dompdf->stream($filename, ['Attachment' => false]);
-            return;
-        } catch (Throwable $e) {
-            log_message('error', 'PDF error: ' . $e->getMessage());
-            show_error('An error occurred while generating the PDF.', 500);
-        }
+        $this->dompdf_lib->stream("Form12BB_{$form_id}.pdf", $disposition === 'download');
     }
+
 
     private function getCsrf()
     {
@@ -162,7 +139,6 @@ class Tax_tools extends CI_Controller
             'dedn_eighty_c' => '80C',
             'dedn_other'    => 'Other',
         ];
-
         foreach ($groups as $groupKey => $sectionName) {
             $types     = isset($inputs[$groupKey]) ? $inputs[$groupKey] : [];
             $amounts   = isset($inputs[$groupKey . '_amount']) ? $inputs[$groupKey . '_amount'] : [];
@@ -170,6 +146,7 @@ class Tax_tools extends CI_Controller
 
             if (is_array($types)) {
                 foreach ($types as $index => $typeName) {
+                    if(!$typeName) continue;
                     $deductions[] = [
                         'section'  => $sectionName,                  // e.g. "80C" or "Other"
                         'type'     => $typeName,                     // e.g. "Life Insurance Premium"

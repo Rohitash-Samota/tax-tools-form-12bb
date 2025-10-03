@@ -5,7 +5,7 @@
     "require": {
         "php": ">=7.4",
         "codeigniter/framework": "3.1.11",
-        "dompdf/dompdf": "^2.0"
+        "dompdf/dompdf": "^2"
     },
     "autoload": {
         "psr-4": {
