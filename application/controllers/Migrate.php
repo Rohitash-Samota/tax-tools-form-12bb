@@ -18,7 +18,6 @@ class Migrate extends CI_Controller
             echo "Migrations ran successfully.\n";
         }
     }
-    // php index.php migrate latest for create latest migration
     public function latest()
     {
         if ($this->migration->latest() === FALSE) {
@@ -28,7 +27,6 @@ class Migrate extends CI_Controller
         }
     }
 
-    // php index.php migrate version 3 for create specific migration
     public function version($target = null)
     {
         $target = (int) $target;

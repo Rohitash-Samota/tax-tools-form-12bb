@@ -83,7 +83,7 @@ class Tax_tools extends CI_Controller
             $result = $this->formRepo->save_step($step_name, $inputs);
             if ($result && isset($result['status']) && $result['status'] == 'failed') {
                 $result['csrf'] = $this->getCsrf();
-                return $this->json($result, 400);
+                return $this->json($result);
             }
             if (!is_array($result)) {
                 $result = ['status' => 'success', 'data' => $result];
@@ -148,8 +148,8 @@ class Tax_tools extends CI_Controller
                 foreach ($types as $index => $typeName) {
                     if(!$typeName) continue;
                     $deductions[] = [
-                        'section'  => $sectionName,                  // e.g. "80C" or "Other"
-                        'type'     => $typeName,                     // e.g. "Life Insurance Premium"
+                        'section'  => $sectionName,
+                        'type'     => $typeName,
                         'amount'   => isset($amounts[$index]) ? (float)$amounts[$index] : 0,
                         'evidence' => isset($evidences[$index]) ? $evidences[$index] : null,
                     ];
