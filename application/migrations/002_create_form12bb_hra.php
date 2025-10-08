@@ -10,7 +10,7 @@ class Migration_Create_form12bb_hra extends CI_Migration
             'rent_paid' => ['type'=>'DECIMAL','constraint'=>'12,2','null'=>TRUE],
             'landlord_name' => ['type'=>'VARCHAR','constraint'=>100,'null'=>TRUE],
             'landlord_address' => ['type'=>'TEXT','null'=>TRUE],
-            'landlord_pan' => ['type'=>'VARCHAR','constraint'=>20,'null'=>TRUE],
+            'landlord_pan' => ['type'=>'VARCHAR','constraint'=>10,'null'=>TRUE],
             'evidence' => ['type'=>'TEXT','null'=>TRUE],
             'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
             'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',

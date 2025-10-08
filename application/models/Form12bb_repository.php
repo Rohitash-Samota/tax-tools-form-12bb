@@ -11,7 +11,6 @@ class Form12bb_repository extends CI_Model
         $this->load->model('Form12bb_ltc_model',    'Ltc');
         $this->load->model('Form12bb_loan_model',   'Loan');
         $this->load->model('Form12bb_deductions_model', 'Ded');
-        $this->load->library('form_validation');
     }
 
     public function get_full(int $form_id): ?array
@@ -31,17 +30,6 @@ class Form12bb_repository extends CI_Model
     {
         try {
             $form_id = isset($inputs['form_id']) && $inputs['form_id'] !== '' ? (int)$inputs['form_id'] : null;
-
-            $valid = $this->validate_step($step_name, $inputs);
-            if (!$valid['ok']) {
-                return [
-                    'status'  => 'failed',
-                    'message' => 'Validation failed for ' . $step_name . '. Please correct the errors and try again.',
-                    'errors'  => $valid['errors'],
-                    'step'    => $step_name,
-                ];
-            }
-
             $result = $this->create_or_update($form_id, $step_name, $inputs);
 
             return array_merge([
@@ -58,99 +46,6 @@ class Form12bb_repository extends CI_Model
                 'step'    => $step_name,
             ];
         }
-    }
-
-    private function validate_step(string $step, array $data): array
-    {
-        $this->form_validation->reset_validation();
-        $this->form_validation->set_data($data);
-
-        $errors = [];
-
-        switch ($step) {
-            case 'employee_details':
-                $this->form_validation->set_rules('employee_name', 'Name', 'trim|required|max_length[100]');
-                $this->form_validation->set_rules(
-                    'pan',
-                    'PAN',
-                    'trim|required|regex_match[/^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/]',
-                    ['regex_match' => 'Invalid PAN format. Example: ABCDE1234F']
-                );
-                $this->form_validation->set_rules('father_name', 'Father Name', 'trim|required|max_length[100]');
-                $this->form_validation->set_rules(
-                    'mobile_no',
-                    'Mobile',
-                    'trim|required|regex_match[/^[6-9][0-9]{9}$/]',
-                    ['regex_match' => 'Enter a valid 10-digit Indian mobile number.']
-                );
-                $this->form_validation->set_rules(
-                    'email',
-                    'Email',
-                    'trim|required|regex_match[/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i]',
-                    ['regex_match' => 'Invalid email address.']
-                );
-                $this->form_validation->set_rules('place', 'Place', 'trim|max_length[100]');
-                $this->form_validation->set_rules('address', 'Address', 'trim');
-                break;
-
-            case 'housing_rent_allowance':
-                $this->form_validation->set_rules('hra_rent_paid', 'Rent Paid', 'trim|numeric');
-                $this->form_validation->set_rules('hra_landlord_name', 'HRA Landlord Name', 'trim|max_length[100]');
-                $this->form_validation->set_rules('hra_landlord_pan', 'HRA Landlord PAN', 'trim|alpha_numeric|exact_length[10]|regex_match[/^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/]', ['regex_match' => 'Invalid PAN format. Example: ABCDE1234F']);
-                $this->form_validation->set_rules('hra_landlord_address', 'HRA Landlord Address', 'trim|max_length[200]');
-                $this->form_validation->set_rules('hra_evidence', 'HRA Evidence', 'trim|max_length[200]');
-                break;
-
-            case 'leave_travel_concession':
-                $this->form_validation->set_rules('ltc_amount', 'LTC Amount', 'trim|numeric');
-                $this->form_validation->set_rules('ltc_evidence', 'LTC Evidence', 'trim|max_length[200]');
-                break;
-
-            case 'interest_on_loan':
-                $this->form_validation->set_rules('home_loan_interest_payable', 'Interest Payable', 'trim|numeric');
-                $this->form_validation->set_rules('home_loan_lender_name', 'Lender Name', 'trim|max_length[100]');
-                $this->form_validation->set_rules('home_loan_lender_pan', 'Lender PAN', 'trim|alpha_numeric|exact_length[10]|regex_match[/^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/]', ['regex_match' => 'Invalid PAN format. Example: ABCDE1234F']);
-                $this->form_validation->set_rules('home_loan_lender_address', 'Lender Address', 'trim|max_length[200]');
-                $this->form_validation->set_rules('home_loan_evidence', 'Loan Evidence', 'trim|max_length[200]');
-                break;
-
-            case 'deductions':
-                if($data['deductions'] === null) {
-                    $data['deductions'] = [];
-                }
-                if (!isset($data['deductions']) || !is_array($data['deductions'])) {
-                    $errors['deductions'] = 'Deductions must be a non-empty array.';
-                } else {
-                    $idx = 0;
-                    foreach ($data['deductions'] as $row) {
-                        if (!isset($row['type']) || trim((string)$row['type']) === '') {
-                            $errors["deductions[$idx][type]"] = 'Deduction Type is required.';
-                        } elseif (mb_strlen($row['type']) > 100) {
-                            $errors["deductions[$idx][type]"] = 'Deduction Type must be at most 100 characters.';
-                        }
-
-                        if (!isset($row['amount']) || !is_numeric($row['amount'])) {
-                            $errors["deductions[$idx][amount]"] = 'Deduction Amount must be numeric.';
-                        }
-                        if (isset($row['evidence']) && mb_strlen((string)$row['evidence']) > 200) {
-                            $errors["deductions[$idx][evidence]"] = 'Deduction Evidence must be at most 200 characters.';
-                        }
-                        $idx++;
-                    }
-                }
-                break;
-
-            default:
-                $errors['_step'] = 'Invalid step.';
-        }
-
-        $ok = $this->form_validation->run();
-        if (!$ok) {
-            $fv_errors = $this->form_validation->error_array();
-            $errors = array_merge($errors, $fv_errors);
-        }
-
-        return ['ok' => empty($errors), 'errors' => $errors];
     }
 
     private function create_or_update(?int $form_id, string $step_name, array $data): array

@@ -10,7 +10,7 @@ class Migration_Create_form12bb_loan extends CI_Migration
             'interest_payable' => ['type'=>'DECIMAL','constraint'=>'12,2','null'=>TRUE],
             'loan_provider'    => ['type'=>'VARCHAR','constraint'=>100,'null'=>TRUE],
             'loan_provider_address' => ['type'=>'TEXT','null'=>TRUE],
-            'lender_pan' => ['type'=>'VARCHAR','constraint'=>20,'null'=>TRUE],
+            'lender_pan' => ['type'=>'VARCHAR','constraint'=>10,'null'=>TRUE],
             'evidence'   => ['type'=>'TEXT','null'=>TRUE],
             'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
             'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
