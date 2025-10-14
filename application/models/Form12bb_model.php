@@ -19,23 +19,23 @@ class Form12bb_model extends CI_Model
 
     public function get(int $id): ?array
     {
-        $row = $this->db->where('id', $id)->get($this->table)->row_array();
+        $row = $this->db->where('form_12bb_id', $id)->get($this->table)->row_array();
         return $row ?: null;
     }
 
     public function update(int $id, array $data): bool
     {
-        return $this->db->where('id', $id)->update($this->table, $data);
+        return $this->db->where('form_12bb_id', $id)->update($this->table, $data);
     }
 
     public function delete(int $id): bool
     {
-        return $this->db->where('id', $id)->delete($this->table);
+        return $this->db->where('form_12bb_id', $id)->delete($this->table);
     }
 
     public function list(array $filters = [], int $limit = 50, int $offset = 0): array
     {
         if (!empty($filters)) $this->db->where($filters);
-        return $this->db->order_by('id', 'DESC')->limit($limit, $offset)->get($this->table)->result_array();
+        return $this->db->order_by('form_12bb_id', 'DESC')->limit($limit, $offset)->get($this->table)->result_array();
     }
 }

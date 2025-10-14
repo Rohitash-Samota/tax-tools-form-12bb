@@ -25,7 +25,7 @@ class Tax_tools extends CI_Controller
             $data = [];
             $data['page_title'] = 'Form 12BB : Generator Form 12BB & Claim your Tax benefits - Tax2win';
             $data['scripts'] = [base_url('/assets/js/form_12bb/script.js')];
-            $data['csrf'] = $this->getCsrf();
+            $data['csrf'] = $this->get_csrf();
 
             $data['content'] = $this->load->view('form_12bb/index', $data, TRUE);
             $this->load->view('layouts/app', $data);
@@ -45,7 +45,7 @@ class Tax_tools extends CI_Controller
                 return $this->json([
                     'status' => 'failed',
                     'message' => 'Form ID is required to load data.',
-                    'csrf' => $this->getCsrf(),
+                    'csrf' => $this->get_csrf(),
                 ], 400);
             }
 
@@ -55,20 +55,20 @@ class Tax_tools extends CI_Controller
                 return $this->json([
                     'status' => 'failed',
                     'message' => 'Invalid Form ID. No data found.',
-                    'csrf' => $this->getCsrf(),
+                    'csrf' => $this->get_csrf(),
                 ], 404);
             }
 
             return $this->json([
                 'status' => 'success',
                 'data'   => $data,
-                'csrf'   => $this->getCsrf(),
+                'csrf'   => $this->get_csrf(),
             ]);
         } catch (Throwable $e) {
             return $this->json([
                 'status' => 'failed',
                 'message' => 'An error occurred while loading the form.',
-                'csrf' => $this->getCsrf(),
+                'csrf' => $this->get_csrf(),
             ], 500);
         }
     }
@@ -79,34 +79,35 @@ class Tax_tools extends CI_Controller
             $inputs    = $this->input->post() ?: [];
             $step_name = $this->input->post('step') ?: 'employee_details';
 
-            if ($step_name == 'deductions') {
-                $inputs['deductions'] = $this->formateDeductions($inputs);
-            }
-
             $valid_result = $this->validate_step($step_name, $inputs);
 
             if (isset($valid_result['status']) && $valid_result['status'] === 'failed') {
-                $valid_result['csrf'] = $this->getCsrf();
+                $valid_result['csrf'] = $this->get_csrf();
                 return $this->json($valid_result, 422);
             }
+
+            if ($step_name == 'deductions') {
+                $inputs['deductions'] = $this->formate_deductions($inputs);
+            }
+
 
             $result = $this->formRepo->save_step($step_name, $inputs);
 
             if (isset($result['status']) && $result['status'] === 'failed') {
-                $result['csrf'] = $this->getCsrf();
+                $result['csrf'] = $this->get_csrf();
                 return $this->json($result, 400);
             }
             if (!is_array($result)) {
                 $result = ['status' => 'success', 'data' => $result];
             }
 
-            $result['csrf'] = $this->getCsrf();
+            $result['csrf'] = $this->get_csrf();
             return $this->json($result);
         } catch (Throwable $e) {
             return $this->json([
                 'status' => 'failed',
                 'message' => 'An error occurred while saving the form.',
-                'csrf' => $this->getCsrf(),
+                'csrf' => $this->get_csrf(),
             ], 500);
         }
     }
@@ -128,7 +129,7 @@ class Tax_tools extends CI_Controller
     }
 
 
-    private function getCsrf()
+    private function get_csrf()
     {
         return [
             'name' => $this->security->get_csrf_token_name(),
@@ -138,18 +139,14 @@ class Tax_tools extends CI_Controller
 
     public function get_csrf_token()
     {
-        return $this->json($this->getCsrf());
+        return $this->json($this->get_csrf());
     }
 
-    private function formateDeductions($inputs)
+    private function formate_deductions($inputs)
     {
         $deductions = [];
-
-        $groups = [
-            'dedn_eighty_c' => '80C',
-            'dedn_other'    => 'Other',
-        ];
-        foreach ($groups as $groupKey => $sectionName) {
+        
+        foreach (FORM_12BB_DEDUCTIONS_GROUP as $groupKey => $sectionName) {
             $types     = isset($inputs[$groupKey]) ? $inputs[$groupKey] : [];
             $amounts   = isset($inputs[$groupKey . '_amount']) ? $inputs[$groupKey . '_amount'] : [];
             $evidences = isset($inputs[$groupKey . '_evidence']) ? $inputs[$groupKey . '_evidence'] : [];
@@ -237,27 +234,28 @@ class Tax_tools extends CI_Controller
                 break;
 
             case 'deductions':
-                if ($data['deductions'] === null) {
-                    $data['deductions'] = [];
-                }
-                if (!isset($data['deductions']) || !is_array($data['deductions'])) {
-                    $errors['deductions'] = 'Deductions must be a non-empty array.';
-                } else {
-                    $idx = 0;
-                    foreach ($data['deductions'] as $row) {
-                        if (!isset($row['type']) || trim((string)$row['type']) === '') {
-                            $errors["deductions[$idx][type]"] = 'Deduction Type is required.';
-                        } elseif (mb_strlen($row['type']) > 100) {
-                            $errors["deductions[$idx][type]"] = 'Deduction Type must be at most 100 characters.';
-                        }
+                foreach (FORM_12BB_DEDUCTIONS_GROUP as $groupKey => $sectionName) {
+                    $types     = $data[$groupKey] ?? [];
+                    $amounts   = $data[$groupKey . '_amount'] ?? [];
+                    $evidences = $data[$groupKey . '_evidence'] ?? [];
 
-                        if (!isset($row['amount']) || !is_numeric($row['amount'])) {
-                            $errors["deductions[$idx][amount]"] = 'Deduction Amount must be numeric.';
-                        }
-                        if (isset($row['evidence']) && mb_strlen((string)$row['evidence']) > 200) {
-                            $errors["deductions[$idx][evidence]"] = 'Deduction Evidence must be at most 200 characters.';
-                        }
-                        $idx++;
+                    foreach ((array)$types as $i => $type) {
+                        $type = trim((string)$type);
+                        $amt  = $amounts[$i] ?? '';
+                        $evi  = trim((string)($evidences[$i] ?? ''));
+
+                        if ($type !== '') $foundAny = true;
+
+                        if ($amt !== '' && $type === '')
+                            $errors["{$groupKey}[{$i}][type]"] = 'Type required when amount is given.';
+                        if ($type !== '' && mb_strlen($type) > 100)
+                            $errors["{$groupKey}[{$i}][type]"] = 'Type max 100 chars.';
+                        if ($amt !== '' && !is_numeric($amt))
+                            $errors["{$groupKey}[{$i}][amount]"] = 'Amount must be numeric.';
+                        if ($amt > 0 && $evi === '')
+                            $errors["{$groupKey}[{$i}][evidence]"] = 'Evidence required when amount > 0.';
+                        if ($evi !== '' && mb_strlen($evi) > 200)
+                            $errors["{$groupKey}[{$i}][evidence]"] = 'Evidence max 200 chars.';
                     }
                 }
                 break;
@@ -273,7 +271,7 @@ class Tax_tools extends CI_Controller
         }
 
         $valid = ['ok' => empty($errors), 'errors' => $errors];
-        
+
         if (!$valid['ok']) {
             return [
                 'status'  => 'failed',

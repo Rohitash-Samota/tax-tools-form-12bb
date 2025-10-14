@@ -126,12 +126,12 @@ class Form12bb_repository extends CI_Model
             'evidence'         => $data['hra_evidence'] ?? null,
         ];
         $existing = $this->Hra->list_by_form($form_id);
-        log_message('debug', 'Existing HRA records: ' . json_encode($existing));
+
         if (empty($existing)) {
-            $newData['form_id'] = $form_id;
+            $newData['form_12bb_id'] = $form_id;
             $this->Hra->create($newData);
         } else {
-            $this->Hra->update($existing[0]['id'], $newData);
+            $this->Hra->update($existing[0]['form_12bb_hra_id'], $newData);
         }
         $this->db->trans_complete();
         return $this->db->trans_status() !== FALSE;
@@ -146,10 +146,10 @@ class Form12bb_repository extends CI_Model
         ];
         $existing = $this->Ltc->list_by_form($form_id);
         if (empty($existing)) {
-            $new_data['form_id'] = $form_id;
+            $new_data['form_12bb_id'] = $form_id;
             $this->Ltc->create($new_data);
         } else {
-            $this->Ltc->update($existing[0]['id'], $new_data);
+            $this->Ltc->update($existing[0]['form_12bb_ltc_id'], $new_data);
         }
         $this->db->trans_complete();
         return $this->db->trans_status() !== FALSE;
@@ -169,10 +169,10 @@ class Form12bb_repository extends CI_Model
         $existing = $this->Loan->list_by_form($form_id);
         log_message('debug', 'Existing Loan records: ' . json_encode($existing));
         if (empty($existing)) {
-            $new_data['form_id'] = $form_id;
+            $new_data['form_12bb_id'] = $form_id;
             $this->Loan->create($new_data);
         } else {
-            $this->Loan->update($existing[0]['id'], $new_data);
+            $this->Loan->update($existing[0]['form_12bb_loan_id'], $new_data);
         }
         $this->db->trans_complete();
         return $this->db->trans_status() !== FALSE;
@@ -183,7 +183,7 @@ class Form12bb_repository extends CI_Model
         $this->db->trans_start();
         $this->Ded->delete_by_form($form_id);
         foreach ($deductions as $r) {
-            $r['form_id'] = $form_id;
+            $r['form_12bb_id'] = $form_id;
             $this->Ded->create($r);
         }
         $this->db->trans_complete();
@@ -197,19 +197,19 @@ class Form12bb_repository extends CI_Model
         $form_id = $this->Form->create($form);
 
         foreach ($hra as $row) {
-            $row['form_id'] = $form_id;
+            $row['form_12bb_id'] = $form_id;
             $this->Hra->create($row);
         }
         foreach ($ltc as $row) {
-            $row['form_id'] = $form_id;
+            $row['form_12bb_id'] = $form_id;
             $this->Ltc->create($row);
         }
         foreach ($loans as $r) {
-            $r['form_id'] = $form_id;
+            $r['form_12bb_id'] = $form_id;
             $this->Loan->create($r);
         }
         foreach ($deductions as $r) {
-            $r['form_id'] = $form_id;
+            $r['form_12bb_id'] = $form_id;
             $this->Ded->create($r);
         }
 
