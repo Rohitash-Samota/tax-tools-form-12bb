@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Migrate extends CI_Controller
 {
@@ -24,17 +24,6 @@ class Migrate extends CI_Controller
             show_error($this->migration->error_string());
         } else {
             echo "Migrated to latest version.\n";
-        }
-    }
-
-    public function version($target = null)
-    {
-        $target = (int) $target;
-        if (!$target) show_404();
-        if ($this->migration->version($target) === FALSE) {
-            show_error($this->migration->error_string());
-        } else {
-            echo "Migrated to version {$target}.\n";
         }
     }
 }
